@@ -17,7 +17,16 @@ harm.
 
 ## The solution
 
-CyberGuard AI uses a focused multi-agent workflow:
+CyberGuard AI has two safe demonstration paths:
+
+- **A. Streamlit local demo:** `app.py` uses deterministic local Python tools
+  directly for redaction, risk scoring, and defensive control lookup. This path
+  works without an API key.
+- **B. ADK agent demo:** `adk web` runs the four-agent workflow in
+  `cyberguard_agent/agent.py`. The Controls Agent connects to the local MCP
+  server over stdio to retrieve defensive guidance.
+
+The ADK path uses a focused multi-agent workflow:
 
 1. **Intake Agent** converts a plain-language concern into a minimal incident brief.
 2. **Risk Agent** estimates likelihood, impact, and priority using a transparent
@@ -27,17 +36,25 @@ CyberGuard AI uses a focused multi-agent workflow:
 
 ## Architecture
 
-```mermaid
-flowchart LR
-  U[Small-business user] --> UI[Streamlit interface]
-  UI --> SA[ADK SequentialAgent]
-  SA --> I[Intake Agent]
-  I --> R[Risk Agent]
-  R --> C[Controls Agent]
-  C --> M[MCP Security Controls Server]
-  M --> E[Essential Eight control catalogue]
-  C --> F[Report Agent]
-  F --> H[Human-reviewed action plan]
+```text
+Path A: deterministic local demo
+
+User -> Streamlit UI: app.py
+     -> redact_sensitive_text()
+     -> calculate_risk()
+     -> get_control_guidance()
+     -> human-reviewed triage plan
+
+Path B: ADK and MCP demo
+
+User -> ADK web -> SequentialAgent: cyberguard_triage_workflow
+     -> Intake Agent -> Risk Agent -> Controls Agent -> Report Agent
+                                  \-> local FastMCP server over stdio
+
+MCP tools:
+- list_control_categories
+- get_control_guidance
+- calculate_risk
 ```
 
 ## Capstone concepts demonstrated
@@ -45,7 +62,7 @@ flowchart LR
 | Requirement | Where it appears |
 |---|---|
 | ADK multi-agent system | `cyberguard_agent/agent.py` uses a `SequentialAgent` and four specialised agents. |
-| MCP server | `mcp_server/server.py` exposes control guidance and the risk matrix through FastMCP. |
+| MCP server | `mcp_server/server.py` exposes control guidance and risk scoring through FastMCP. |
 | Security features | Input minimisation, redaction, least-privilege local tools, no destructive operations, and API keys stored only in `.env`. |
 | Deployability | Streamlit app plus `Dockerfile`. |
 | Agent skills | Custom Python risk calculation tool and MCP-served control lookup. |
@@ -71,7 +88,7 @@ cyberguard-ai/
 └── .env.example
 ```
 
-## Safety and privacy design
+## Security and privacy
 
 - **Defensive-only:** no port scans, exploitation, phishing generation, credential
   collection, malware analysis, or system changes.
@@ -80,12 +97,16 @@ cyberguard-ai/
 - **Data minimisation:** users are told not to enter passwords, API keys, recovery
   codes, full personal details, or confidential files.
 - **Input redaction:** common secrets and email-like identifiers are redacted before
-  the text is shown in the local demo.
+  the text is shown in the local demo. This is a basic prototype safeguard, not a
+  complete data-loss-prevention system.
 - **Least privilege:** the MCP server exposes only a static control catalogue and a
   mathematical risk calculator. It cannot access files, networks, or operating
   system commands.
 - **No secrets in Git:** `.env` is excluded via `.gitignore`; use `.env.example` as
   a template.
+- **Prototype limits:** the local demo has no authentication, tenant isolation, or
+  production incident-response workflow. It is for capstone demonstration and
+  awareness support only.
 
 ## Run the safe local demo
 
@@ -127,16 +148,18 @@ and defensive controls that the agent workflow uses.
 
 ## Run the ADK multi-agent workflow
 
-1. Copy `.env.example` to `.env`.
+1. Copy `.env.example` to `.env` in the repository root.
 2. Add your own `GOOGLE_API_KEY` locally. Never commit this file.
-3. Start the ADK development interface from the repository root:
+3. Optionally set `GEMINI_MODEL`; if it is blank, the agent falls back to
+   `gemini-flash-latest`.
+4. Start the ADK development interface from the repository root:
 
 ```bash
 adk web
 ```
 
-4. In the ADK interface, select `cyberguard_agent`.
-5. Try this safe prompt:
+5. In the ADK interface, select `cyberguard_agent`.
+6. Try this safe prompt:
 
 > A staff member clicked a suspicious link in an email but did not enter a password. They use a shared laptop and are unsure what to do.
 
@@ -172,13 +195,27 @@ docker run --rm -p 8501:8501 cyberguard-ai
 
 Open `http://localhost:8501`.
 
+## Verified locally
+
+Fill in this table before final submission. Do not mark an item as verified until
+the command has run successfully in a clean local setup.
+
+| Check | Command | Result |
+|---|---|---|
+| Python syntax | `python -m compileall -q app.py cyberguard_agent mcp_server` | Pending |
+| Unit tests | `pytest -q` | Pending |
+| Streamlit demo | `streamlit run app.py` | Pending |
+| ADK workflow | `adk web` | Pending |
+| MCP Inspector | `npx @modelcontextprotocol/inspector python mcp_server/server.py` | Pending |
+| Docker image | `docker build -t cyberguard-ai .` | Pending |
+
 ## Suggested 5-minute video flow
 
 1. **0:00–0:35:** Explain the small-business cyber-triage problem.
 2. **0:35–1:10:** Explain why a structured agent team is safer than one generic chatbot.
 3. **1:10–1:55:** Show the architecture diagram and the four agents.
 4. **1:55–3:10:** Run the Streamlit demo with the suspicious-email example.
-5. **3:10–4:00:** Show the MCP Inspector and its two safe tools.
+5. **3:10–4:00:** Show the MCP Inspector and its safe local tools.
 6. **4:00–4:35:** Show the ADK Dev UI agent graph / workflow.
 7. **4:35–5:00:** Explain privacy controls, human review, and future work.
 
