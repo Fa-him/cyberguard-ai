@@ -4,18 +4,18 @@ from typing import Any
 
 
 def risk_label(score: int) -> str:
-    """Map a 1–25 risk score to a clear, human-readable priority."""
+    """Map a 1-25 risk score to a clear, human-readable priority."""
     if score >= 17:
-        return "Critical — escalate promptly"
+        return "Critical - escalate promptly"
     if score >= 10:
-        return "High — prioritise same-day review"
+        return "High - prioritise same-day review"
     if score >= 5:
-        return "Moderate — plan corrective action"
-    return "Low — monitor and improve controls"
+        return "Moderate - plan corrective action"
+    return "Low - monitor and improve controls"
 
 
 def calculate_risk(likelihood: int, impact: int) -> dict[str, Any]:
-    """Calculate a transparent 5 × 5 cyber-risk score.
+    """Calculate a transparent 5 x 5 cyber-risk score.
 
     Args:
         likelihood: Integer from 1 (rare) to 5 (almost certain).
@@ -40,5 +40,5 @@ def calculate_risk(likelihood: int, impact: int) -> dict[str, Any]:
         "impact": impact,
         "score": score,
         "priority": risk_label(score),
-        "method": "risk score = likelihood × impact",
+        "method": "risk score = likelihood x impact",
     }
