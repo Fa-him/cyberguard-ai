@@ -7,10 +7,10 @@ from cyberguard_agent.tools.redaction import redact_sensitive_text
 from cyberguard_agent.tools.risk import calculate_risk, risk_label
 
 
-st.set_page_config(page_title="CyberGuard AI", page_icon="🛡️", layout="wide")
+st.set_page_config(page_title="CyberGuard AI", layout="wide")
 
-st.title("🛡️ CyberGuard AI")
-st.caption("Defensive cyber-risk triage for small organisations — human review required.")
+st.title("CyberGuard AI")
+st.caption("Defensive cyber-risk triage for small organisations - human review required.")
 
 with st.expander("Safety and privacy notice", expanded=True):
     st.warning(
