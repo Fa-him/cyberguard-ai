@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 
+from dotenv import load_dotenv
 from google.adk.agents import Agent, SequentialAgent
 from google.adk.tools.mcp_tool import McpToolset
 from google.adk.tools.mcp_tool.mcp_session_manager import StdioConnectionParams
@@ -10,12 +12,15 @@ from mcp import StdioServerParameters
 
 from cyberguard_agent.tools.risk import calculate_risk
 
-MODEL = "gemini-flash-latest"
-SERVER_PATH = Path(__file__).resolve().parents[1] / "mcp_server" / "server.py"
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+load_dotenv(PROJECT_ROOT / ".env")
 
-# This read-only MCP toolset is intentionally limited. It provides only a static
-# defensive control catalogue and a risk-matrix lookup; it cannot browse, scan,
-# access files, or execute shell commands.
+DEFAULT_MODEL = "gemini-flash-latest"
+MODEL = os.getenv("GEMINI_MODEL", "").strip() or DEFAULT_MODEL
+SERVER_PATH = PROJECT_ROOT / "mcp_server" / "server.py"
+
+# This read-only MCP toolset is intentionally limited for the controls agent. It
+# cannot browse, scan, access files, or execute shell commands.
 control_mcp_toolset = McpToolset(
     connection_params=StdioConnectionParams(
         server_params=StdioServerParameters(
