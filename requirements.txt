@@ -1,5 +1,9 @@
+# Runtime dependencies are intentionally flexible for the capstone prototype.
+# Record tested versions in the README after local verification.
 google-adk
 mcp[cli]
 python-dotenv
 streamlit
+
+# Local deterministic tests.
 pytest
