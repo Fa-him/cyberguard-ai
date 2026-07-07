@@ -1,6 +1,32 @@
+# Local secrets and environment files. Keep templates trackable.
 .env
-.venv/
-__pycache__/
-*.py[cod]
-.pytest_cache/
+.env.*
+**/.env
+**/.env.*
+!.env.example
+!**/.env.example
 .streamlit/secrets.toml
+**/.streamlit/secrets.toml
+
+# Virtual environments.
+.venv/
+venv/
+env/
+
+# Python-generated files.
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+**/.pytest_cache/
+
+# ADK and local runtime state.
+**/.adk/
+*.db
+*.sqlite
+*.sqlite3
+
+# Build outputs.
+build/
+dist/
