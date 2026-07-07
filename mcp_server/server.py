@@ -35,7 +35,7 @@ def get_control_guidance(category: str) -> dict:
 
 @mcp.tool()
 def calculate_risk(likelihood: int, impact: int) -> dict:
-    """Calculate a transparent 5 × 5 risk score without accessing any system."""
+    """Calculate a transparent 5 x 5 risk score without accessing any system."""
     return _calculate_risk(likelihood, impact)
 
 if __name__ == "__main__":
